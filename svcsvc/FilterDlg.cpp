@@ -6,6 +6,34 @@
 #include "FilterDlg.h"
 //#include <queue>
 
+// Поддержка нескольких мониторов (на системах без multimon - заглушки на основной экран)
+#define COMPILE_MULTIMON_STUBS
+#include <multimon.h>
+
+// Рабочая область (без панели задач) монитора, на котором находится точка
+static CRect GetWorkAreaFromPoint(POINT pt)
+{
+	MONITORINFO mi;
+	mi.cbSize = sizeof(mi);
+	if (GetMonitorInfo(MonitorFromPoint(pt, MONITOR_DEFAULTTONEAREST), &mi))
+		return CRect(mi.rcWork);
+	RECT rc;
+	SystemParametersInfo(SPI_GETWORKAREA, 0, &rc, 0);
+	return CRect(rc);
+}
+
+// Рабочая область монитора, на котором находится (большая часть) окна
+static CRect GetWorkAreaFromWindow(HWND hWnd)
+{
+	MONITORINFO mi;
+	mi.cbSize = sizeof(mi);
+	if (GetMonitorInfo(MonitorFromWindow(hWnd, MONITOR_DEFAULTTONEAREST), &mi))
+		return CRect(mi.rcWork);
+	RECT rc;
+	SystemParametersInfo(SPI_GETWORKAREA, 0, &rc, 0);
+	return CRect(rc);
+}
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
@@ -97,7 +125,7 @@ long CFilterDlg::GetFullAutoWidth()
 	}
 	
 	nWidth += 16 + 15 + (GetSystemMetrics(SM_CXBORDER) * 4) + GetSystemMetrics(SM_CXVSCROLL);
-	nWidth = __min(nWidth, GetSystemMetrics(SM_CXFULLSCREEN) - 20);
+	nWidth = __min(nWidth, GetWorkAreaFromWindow(m_hWnd).Width() - 20);
 	
 	::DeleteObject(fnt);
 	::ReleaseDC(m_tree.m_hWnd, dc);
@@ -302,21 +330,23 @@ BOOL CFilterDlg::OnInitDialog()
 	rc.right = rc.left + w;
 	rc.bottom = rc.top + h;
 	m_up = false;
-	int sw = GetSystemMetrics(SM_CXFULLSCREEN);
-	int sh = GetSystemMetrics(SM_CYFULLSCREEN);
-	if(rc.right > sw)
-	{
-		int dw = rc.right - sw;
-		rc.right -= dw;
-		rc.left -= dw;
-	}
-	if(rc.bottom > sh)
+	// Раньше здесь использовались SM_CXFULLSCREEN/SM_CYFULLSCREEN - это размеры
+	// ОСНОВНОГО монитора с началом в (0,0). На втором мониторе (справа/снизу)
+	// окно "не влезало" и сдвигалось к правому краю основного монитора.
+	CRect rcWork = GetWorkAreaFromPoint(m_point);
+	if(rc.right > rcWork.right)
+		rc.OffsetRect(rcWork.right - rc.right, 0);
+	if(rc.left < rcWork.left)
+		rc.OffsetRect(rcWork.left - rc.left, 0);
+	if(rc.bottom > rcWork.bottom)
 	{
 		m_up = true;
 		h += fontH;
 		rc.bottom -= h;
 		rc.top -= h;
 	}
+	if(rc.top < rcWork.top)
+		rc.OffsetRect(0, rcWork.top - rc.top);
 	
 	MoveWindow(rc);
 
@@ -803,8 +833,7 @@ void CFilterDlg::ReSize()
 	int count = m_tree.GetCount();
 	//if(count > 10) count = 10;
 
-	RECT rcWorkArea;
-	SystemParametersInfo(SPI_GETWORKAREA, 0, &rcWorkArea, 0);
+	CRect rcWorkArea = GetWorkAreaFromWindow(m_hWnd);
 	int MaxH = ((rcWorkArea.bottom - rcWorkArea.top) * 50) / 100; //отдадим 50% высоты
 	int ItemH = m_tree.GetItemHeight();
 	int h = count * m_tree.GetItemHeight();
@@ -821,7 +850,7 @@ void CFilterDlg::ReSize()
 	if (m_flags & FVF_AUTOWIDTH)
 	{
 		int nWidth = GetTreeAutoWidth();
-		int nSX = GetSystemMetrics(SM_CXFULLSCREEN);
+		int nSX = rcWorkArea.right;
 		if (rc.left + nWidth > nSX)
 		{
 			nWidth = nSX - rc.left;
@@ -849,6 +878,7 @@ void CFilterDlg::ReSize()
 
 
 	if( rc.bottom > rcWorkArea.bottom ) rc.bottom = rcWorkArea.bottom;
+	if( rc.top < rcWorkArea.top ) rc.top = rcWorkArea.top;
 	MoveWindow(rc);
 }
 
