@@ -15,6 +15,15 @@ ActiveX-компонент (`Svcsvc.Service`) с полезными функци
   Теперь используется рабочая область того монитора, где показывается окно
   (`MonitorFromPoint` / `MonitorFromWindow` + `GetMonitorInfo`).
 
+## Файлы
+
+| Файл | Что это |
+|---|---|
+| `svcsvc.txt` | Описание методов и история версий (CP1251), для поставки рядом с DLL. Совпадает с `svcsvc/readme.txt`. |
+| `svcsvc_service.ints` | Подсказки методов и свойств `Svcsvc.Service` для Телепата (OpenConf). |
+| `test_SvcSvc.ert` | Тестовая обработка для 1С 7.7. |
+| `svcsvc/` | Исходники (VS2005; есть также проект VC6 `svcsvc.dsp`). |
+
 ## Установка
 
 1. Скопируйте `svcsvc.dll`, например, в `1Cv77\BIN\config\system\`.
