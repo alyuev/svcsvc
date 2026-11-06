@@ -1,0 +1,26 @@
+# Результаты сборки
+/svcsvc/ReleaseMinDependency/
+/svcsvc/ReleaseMinSize/
+/svcsvc/ReleaseU*/
+/svcsvc/Debug*/
+*.obj
+*.pch
+*.pdb
+*.idb
+*.ilk
+*.exp
+*.lib
+*.res
+*.manifest
+*.trg
+*.ncb
+*.suo
+*.user
+*.opt
+*.plg
+*.aps
+
+# Резервные копии и архивы исходного дистрибутива
+*.bak
+*.rar
+/svcsvc.dll
