@@ -100,8 +100,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 1,0,1,1
- PRODUCTVERSION 1,0,1,1
+ FILEVERSION 1,0,1,2
+ PRODUCTVERSION 1,0,1,2
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -117,12 +117,12 @@ BEGIN
         BLOCK "041904e3"
         BEGIN
             VALUE "FileDescription", "svcsvc Module"
-            VALUE "FileVersion", "1, 0, 1, 1"
+            VALUE "FileVersion", "1, 0, 1, 2"
             VALUE "InternalName", "svcsvc"
             VALUE "LegalCopyright", "Copyright 2004"
             VALUE "OriginalFilename", "svcsvc.DLL"
             VALUE "ProductName", "svcsvc Module"
-            VALUE "ProductVersion", "1, 0, 1, 1"
+            VALUE "ProductVersion", "1, 0, 1, 2"
         END
     END
     BLOCK "VarFileInfo"
